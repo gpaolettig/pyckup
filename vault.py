@@ -20,20 +20,21 @@ def validate(path):
         raise FileNotFoundError(f"File o directory {path} doesn't exists")
 
 
-def zipdir(directory, zip_file):
+def zipdir(directory, zip_file, formats):
     for root, _, files in os.walk(directory):
         for file in files:
-            file_path = os.path.join(root, file)
-            zip_file.write(file_path, arcname=os.path.relpath(
-                file_path, start=directory))
+            if os.path.splitext(file)[1] not in formats:
+                file_path = os.path.join(root, file)
+                zip_file.write(file_path, arcname=os.path.relpath(file_path, start=directory))
 
 
 if __name__ == '__main__':
     args = parse_arguments()
+    excludeFormats = args.exclude if args.exclude else []
     try:
         validate(Path(args.path))
     except FileNotFoundError as e:
         print(Fore.RED + "ERROR: " + Fore.WHITE + f"{e}")
     date = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
     with zipfile.ZipFile(f'backup_{date}.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
-        zipdir(args.path, zipf)
+        zipdir(args.path, zipf, excludeFormats)
