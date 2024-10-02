@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-import argparse
-import zipfile
-import os
+import argparse, zipfile, os
 from datetime import datetime
 from colorama import Fore, Style
 from pathlib import Path
@@ -22,8 +20,13 @@ def validate(path):
 
 def zipdir(directory, zip_file, formats):
     for root, _, files in os.walk(directory):
+        level = root.replace(directory, '').count(os.sep)
+        indent = ' ' * 4 * (level)
+        print('{}{}/'.format(indent, os.path.basename(root)))
+        subindent = ' ' * 4 * (level + 1)
         for file in files:
             if os.path.splitext(file)[1] not in formats:
+                print('{}{}'.format(subindent, file))
                 file_path = os.path.join(root, file)
                 zip_file.write(file_path, arcname=os.path.relpath(file_path, start=directory))
 
